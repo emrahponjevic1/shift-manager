@@ -60,19 +60,29 @@ export default function TimelineView({
   };
 
   // Start dragging shift (move or resize)
+  const getClientX = (e) => {
+    if (e.touches && e.touches.length > 0) return e.touches[0].clientX;
+    if (e.changedTouches && e.changedTouches.length > 0) return e.changedTouches[0].clientX;
+    return e.clientX;
+  };
+
   const handleStartDrag = (e, shift, mode) => {
     e.stopPropagation();
-    e.preventDefault();
+    if (e.cancelable && e.type !== 'touchstart') {
+      e.preventDefault();
+    }
     setSelectedShiftId(shift.id);
 
     const trackElem = e.currentTarget.closest('.timeline-track-area');
     if (!trackElem) return;
     const rect = trackElem.getBoundingClientRect();
+    const clientX = getClientX(e);
+    if (clientX === undefined || clientX === null) return;
 
     const initialInfo = {
       shiftId: shift.id,
       mode,
-      startX: e.clientX,
+      startX: clientX,
       trackWidth: rect.width,
       origStart: shift.start,
       origEnd: shift.end,
@@ -87,11 +97,18 @@ export default function TimelineView({
   useEffect(() => {
     if (!dragState) return;
 
-    const handleMouseMove = (e) => {
+    const handleMove = (e) => {
       const d = dragRef.current;
       if (!d) return;
 
-      const rawDeltaHours = ((e.clientX - d.startX) / d.trackWidth) * TOTAL_HOURS;
+      const clientX = getClientX(e);
+      if (clientX === undefined || clientX === null) return;
+
+      if (e.cancelable && e.type === 'touchmove') {
+        e.preventDefault(); // Stop mobile browser scrolling while dragging/resizing
+      }
+
+      const rawDeltaHours = ((clientX - d.startX) / d.trackWidth) * TOTAL_HOURS;
       const snappedDelta = Math.round(rawDeltaHours * 2) / 2; // snap to 30 mins
       const duration = d.origEnd - d.origStart;
 
@@ -116,7 +133,7 @@ export default function TimelineView({
       setDragState({ ...d });
     };
 
-    const handleMouseUp = () => {
+    const handleEnd = () => {
       const d = dragRef.current;
       if (d) {
         if (d.currentStart !== d.origStart || d.currentEnd !== d.origEnd) {
@@ -127,11 +144,17 @@ export default function TimelineView({
       setDragState(null);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleEnd);
+    window.addEventListener('touchmove', handleMove, { passive: false });
+    window.addEventListener('touchend', handleEnd);
+    window.addEventListener('touchcancel', handleEnd);
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleEnd);
+      window.removeEventListener('touchmove', handleMove);
+      window.removeEventListener('touchend', handleEnd);
+      window.removeEventListener('touchcancel', handleEnd);
     };
   }, [dragState !== null, onUpdateShiftTime]);
 
@@ -397,6 +420,7 @@ export default function TimelineView({
                           >
                             <div
                               onMouseDown={(e) => handleStartDrag(e, shift, 'move')}
+                              onTouchStart={(e) => handleStartDrag(e, shift, 'move')}
                               onDoubleClick={(e) => {
                                 e.stopPropagation();
                                 onOpenEditShiftModal(shift);
@@ -405,7 +429,7 @@ export default function TimelineView({
                                 left: `${leftPct}%`,
                                 width: `calc(${widthPct}% - 2px)`
                               }}
-                              className={`absolute top-1.5 bottom-1.5 rounded-lg bg-gradient-to-r ${theme.bar} border cursor-grab active:cursor-grabbing flex items-center justify-between px-2 select-none transition-shadow ${
+                              className={`absolute top-1.5 bottom-1.5 rounded-lg bg-gradient-to-r ${theme.bar} border cursor-grab active:cursor-grabbing flex items-center justify-between px-2 select-none transition-shadow touch-none ${
                                 isSelected || isDraggingThis
                                   ? 'ring-2 ring-white z-30 shadow-[0_0_20px_rgba(59,130,246,0.5)]'
                                   : 'z-10 shadow-md hover:brightness-105'
@@ -415,12 +439,14 @@ export default function TimelineView({
                               {/* Left Resize Handle */}
                               <div
                                 onMouseDown={(e) => handleStartDrag(e, shift, 'left')}
-                                className="w-3 h-full absolute left-0 cursor-ew-resize hover:bg-white/40 rounded-l flex items-center justify-center"
+                                onTouchStart={(e) => handleStartDrag(e, shift, 'left')}
+                                className="w-7 sm:w-5 h-full absolute left-0 cursor-ew-resize hover:bg-white/40 active:bg-white/50 rounded-l flex items-center justify-center z-20 touch-none select-none"
+                                title="Rastegni početak"
                               >
-                                <span className="w-0.5 h-3 bg-white/60 rounded" />
+                                <span className="w-1 sm:w-0.5 h-4 sm:h-3.5 bg-white/90 rounded-full shadow-sm pointer-events-none" />
                               </div>
 
-                              <div className="w-full text-center pointer-events-none text-[11px] font-black text-white font-mono truncate px-1 drop-shadow-sm flex items-center justify-center gap-1">
+                              <div className="w-full text-center pointer-events-none text-[11px] font-black text-white font-mono truncate px-1 drop-shadow-sm flex items-center justify-center gap-1 select-none">
                                 <span>{formatTime(displayStart)} - {formatTime(displayEnd)}</span>
                                 <span className="text-[9px] opacity-80">({displayEnd - displayStart}h)</span>
                               </div>
@@ -428,9 +454,11 @@ export default function TimelineView({
                               {/* Right Resize Handle */}
                               <div
                                 onMouseDown={(e) => handleStartDrag(e, shift, 'right')}
-                                className="w-3 h-full absolute right-0 cursor-ew-resize hover:bg-white/40 rounded-r flex items-center justify-center"
+                                onTouchStart={(e) => handleStartDrag(e, shift, 'right')}
+                                className="w-7 sm:w-5 h-full absolute right-0 cursor-ew-resize hover:bg-white/40 active:bg-white/50 rounded-r flex items-center justify-center z-20 touch-none select-none"
+                                title="Rastegni kraj"
                               >
-                                <span className="w-0.5 h-3 bg-white/60 rounded" />
+                                <span className="w-1 sm:w-0.5 h-4 sm:h-3.5 bg-white/90 rounded-full shadow-sm pointer-events-none" />
                               </div>
                             </div>
                           </div>

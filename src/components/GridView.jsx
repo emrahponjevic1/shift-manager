@@ -107,19 +107,29 @@ export default function GridView({
   };
 
   // Drag logic for the inline timeline
+  const getClientX = (e) => {
+    if (e.touches && e.touches.length > 0) return e.touches[0].clientX;
+    if (e.changedTouches && e.changedTouches.length > 0) return e.changedTouches[0].clientX;
+    return e.clientX;
+  };
+
   const handleStartTimelineDrag = (e, shift, mode, targetWeekId) => {
     e.stopPropagation();
-    e.preventDefault();
+    if (e.cancelable && e.type !== 'touchstart') {
+      e.preventDefault();
+    }
 
     const trackElem = e.currentTarget.closest('.timeline-track-area');
     if (!trackElem) return;
     const rect = trackElem.getBoundingClientRect();
+    const clientX = getClientX(e);
+    if (clientX === undefined || clientX === null) return;
 
     const initialInfo = {
       targetWeekId,
       shiftId: shift.id,
       mode,
-      startX: e.clientX,
+      startX: clientX,
       trackWidth: rect.width,
       origStart: shift.start,
       origEnd: shift.end,
@@ -134,11 +144,18 @@ export default function GridView({
   useEffect(() => {
     if (!timelineDragState) return;
 
-    const handleMouseMove = (e) => {
+    const handleMove = (e) => {
       const d = timelineDragRef.current;
       if (!d) return;
 
-      const rawDeltaHours = ((e.clientX - d.startX) / d.trackWidth) * TOTAL_HOURS;
+      const clientX = getClientX(e);
+      if (clientX === undefined || clientX === null) return;
+
+      if (e.cancelable && e.type === 'touchmove') {
+        e.preventDefault(); // Stop mobile browser scrolling while dragging/resizing
+      }
+
+      const rawDeltaHours = ((clientX - d.startX) / d.trackWidth) * TOTAL_HOURS;
       const snappedDelta = Math.round(rawDeltaHours * 2) / 2; // snap to 30 mins
       const duration = d.origEnd - d.origStart;
 
@@ -163,7 +180,7 @@ export default function GridView({
       setTimelineDragState({ ...d });
     };
 
-    const handleMouseUp = () => {
+    const handleEnd = () => {
       const d = timelineDragRef.current;
       if (d) {
         if (d.currentStart !== d.origStart || d.currentEnd !== d.origEnd) {
@@ -174,11 +191,17 @@ export default function GridView({
       setTimelineDragState(null);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleEnd);
+    window.addEventListener('touchmove', handleMove, { passive: false });
+    window.addEventListener('touchend', handleEnd);
+    window.addEventListener('touchcancel', handleEnd);
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleEnd);
+      window.removeEventListener('touchmove', handleMove);
+      window.removeEventListener('touchend', handleEnd);
+      window.removeEventListener('touchcancel', handleEnd);
     };
   }, [timelineDragState !== null, onUpdateShiftTime]);
 
@@ -856,12 +879,13 @@ export default function GridView({
                                   >
                                     <div
                                       onMouseDown={(e) => handleStartTimelineDrag(e, shift, 'move', weekObj.id)}
+                                      onTouchStart={(e) => handleStartTimelineDrag(e, shift, 'move', weekObj.id)}
                                       onDoubleClick={() => onOpenEditShiftModal(shift)}
                                       style={{
                                         left: `${leftPct}%`,
                                         width: `calc(${widthPct}% - 2px)`
                                       }}
-                                      className={`absolute top-1.5 bottom-1.5 rounded-xl bg-gradient-to-r ${barBgClass} border border-white/30 cursor-grab active:cursor-grabbing flex items-center justify-between px-2 select-none shadow-lg text-white ${
+                                      className={`absolute top-1.5 bottom-1.5 rounded-xl bg-gradient-to-r ${barBgClass} border border-white/30 cursor-grab active:cursor-grabbing flex items-center justify-between px-2 select-none shadow-lg text-white touch-none ${
                                         isDraggingThis ? 'ring-3 ring-amber-400 z-30 shadow-[0_0_20px_rgba(251,191,36,0.6)]' : 'z-10'
                                       }`}
                                       title="Povucite traku za pomjeranje, ili dvokliknite za izmjenu"
@@ -869,20 +893,26 @@ export default function GridView({
                                       {/* Left resize handle */}
                                       <div
                                         onMouseDown={(e) => handleStartTimelineDrag(e, shift, 'left', weekObj.id)}
-                                        className="w-3 h-full absolute left-0 cursor-ew-resize hover:bg-white/40 rounded-l-xl"
+                                        onTouchStart={(e) => handleStartTimelineDrag(e, shift, 'left', weekObj.id)}
+                                        className="w-7 sm:w-5 h-full absolute left-0 cursor-ew-resize hover:bg-white/40 active:bg-white/50 rounded-l-xl flex items-center justify-center z-20 touch-none select-none"
                                         title="Rastegni početak"
-                                      />
+                                      >
+                                        <span className="w-1 sm:w-0.5 h-4 sm:h-3.5 bg-white/90 rounded-full shadow-sm pointer-events-none" />
+                                      </div>
                                       
-                                      <div className="w-full text-center pointer-events-none text-xs font-black font-mono truncate drop-shadow-md">
+                                      <div className="w-full text-center pointer-events-none text-xs font-black font-mono truncate drop-shadow-md select-none">
                                         {formatTime(displayStart)} - {formatTime(displayEnd)}
                                       </div>
 
                                       {/* Right resize handle */}
                                       <div
                                         onMouseDown={(e) => handleStartTimelineDrag(e, shift, 'right', weekObj.id)}
-                                        className="w-3 h-full absolute right-0 cursor-ew-resize hover:bg-white/40 rounded-r-xl"
+                                        onTouchStart={(e) => handleStartTimelineDrag(e, shift, 'right', weekObj.id)}
+                                        className="w-7 sm:w-5 h-full absolute right-0 cursor-ew-resize hover:bg-white/40 active:bg-white/50 rounded-r-xl flex items-center justify-center z-20 touch-none select-none"
                                         title="Rastegni kraj"
-                                      />
+                                      >
+                                        <span className="w-1 sm:w-0.5 h-4 sm:h-3.5 bg-white/90 rounded-full shadow-sm pointer-events-none" />
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
