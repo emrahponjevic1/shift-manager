@@ -348,6 +348,7 @@
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
+    min-width: 1000px !important;
     height: auto !important;
     min-height: 0 !important;
     overflow: visible !important;
@@ -367,11 +368,12 @@
     display: block !important;
   }
 
-  /* 99% width container centered */
+  /* Full width container centered with min-width for mobile print */
   .print-container {
     box-sizing: border-box !important;
-    width: 99% !important;
-    max-width: 99% !important;
+    width: 100% !important;
+    min-width: 1000px !important;
+    max-width: none !important;
     margin: 0 auto !important;
     padding: 0 !important;
     border: none !important;
@@ -379,7 +381,7 @@
     background-color: #ffffff !important;
   }
 
-  /* Table-fixed forces all 7 days to span 100% width of the header without any truncation */
+  /* Table-fixed forces columns to respect their width without overflow */
   .print-table {
     width: 100% !important;
     table-layout: fixed !important;
@@ -388,9 +390,17 @@
 
   .print-table th,
   .print-table td {
-    width: 14.285% !important;
-    max-width: 14.285% !important;
     box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  /* 7-column day tables (Monday - Sunday) */
+  .print-table-7col th,
+  .print-table-7col td {
+    width: 14.2857% !important;
+    max-width: 14.2857% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
   }
 
   /* Fix: Ensure table header cells have unified background and their inner elements are transparent */
@@ -410,6 +420,7 @@
     break-inside: avoid !important;
     margin-bottom: 3.5mm !important;
     width: 100% !important;
+    min-width: 1000px !important;
   }
 
   .print-page-break {

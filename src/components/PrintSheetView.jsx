@@ -316,7 +316,7 @@ export default function PrintSheetView({
 
       {/* Printable Sheet Card (White Paper styled for A4 Landscape) */}
       <div className="overflow-x-auto rounded-2xl shadow-2xl border border-slate-800 bg-white mx-auto max-w-[1280px] print:border-none print:shadow-none print:rounded-none print:m-0 print:p-0 print:max-w-none print:w-full print:bg-white print:overflow-visible">
-        <div ref={printRef} className="print-container p-6 md:p-8 bg-white text-slate-950 print:p-0 print:my-0 print:mx-auto print:w-[99%] print:max-w-[99%] print:min-w-0 print:bg-white">
+        <div ref={printRef} className="print-container p-6 md:p-8 bg-white text-slate-950 min-w-[850px] md:min-w-[960px] xl:min-w-0 print:min-w-[1000px] print:p-0 print:my-0 print:mx-auto print:w-full print:bg-white">
           {/* Document Header - Clean & Professional for A4 Landscape */}
           <div className="flex justify-between items-center border-b border-slate-300 pb-2 mb-2.5">
             <div className="flex items-center gap-3">
@@ -356,7 +356,7 @@ export default function PrintSheetView({
                     </span>
                   </div>
 
-                  <table className="w-full border-collapse text-left print-table table-fixed">
+                  <table className="w-full border-collapse text-left print-table print-table-7col table-fixed">
                     <thead>
                       <tr className="bg-slate-100 border-b border-slate-300 text-xs font-black text-slate-800 uppercase">
                         {DAYS.map((d, dIdx) => (
@@ -377,7 +377,7 @@ export default function PrintSheetView({
                             .sort((a, b) => a.start - b.start);
 
                           return (
-                            <td key={dIdx} className="p-1 border-r border-slate-200 last:border-r-0 space-y-1 w-[14.285%]">
+                            <td key={dIdx} className="p-1 border-r border-slate-200 last:border-r-0 space-y-1 w-[14.285%] max-w-[14.285%] overflow-hidden">
                               {dayShifts.length === 0 ? (
                                 <div className="text-xs text-slate-300 italic py-2.5 text-center font-bold">—</div>
                               ) : (
@@ -388,16 +388,20 @@ export default function PrintSheetView({
                                   return (
                                     <div
                                       key={s.id}
-                                      className={`py-0.5 px-1.5 rounded border text-[11px] flex items-center justify-between font-bold leading-tight ${
+                                      className={`py-0.5 px-1.5 rounded border text-[11px] font-bold leading-tight min-w-0 overflow-hidden ${
                                         isNight
                                           ? 'bg-slate-50 border-slate-300 text-slate-900'
                                           : 'bg-amber-50/70 border-amber-300 text-slate-900'
                                       }`}
                                     >
-                                      <span className="text-[10.5px] font-black text-slate-900 shrink-0 mr-1">{worker?.name || 'Radnik'}</span>
-                                      <span className="font-mono text-[9.5px] font-bold text-slate-700 whitespace-nowrap ml-auto">
-                                        {formatTime(s.start)} - {formatTime(s.end)}
-                                      </span>
+                                      <div className="flex flex-wrap items-center justify-between gap-x-1 gap-y-0.5 min-w-0">
+                                        <span className="text-[10.5px] font-black text-slate-900 truncate max-w-full">
+                                          {worker?.name || 'Radnik'}
+                                        </span>
+                                        <span className="font-mono text-[9px] sm:text-[9.5px] font-bold text-slate-700 whitespace-nowrap ml-auto">
+                                          {formatTime(s.start)} - {formatTime(s.end)}
+                                        </span>
+                                      </div>
                                     </div>
                                   );
                                 })
@@ -430,7 +434,7 @@ export default function PrintSheetView({
                     </span>
                   </div>
 
-                  <table className="w-full border-collapse text-left print-table table-fixed">
+                  <table className="w-full border-collapse text-left print-table print-table-7col table-fixed">
                     <thead>
                       <tr className="bg-slate-100 border-b border-slate-300 text-xs font-black text-slate-800 uppercase">
                         {DAYS.map((d, dIdx) => (
@@ -451,7 +455,7 @@ export default function PrintSheetView({
                             .sort((a, b) => a.start - b.start);
 
                           return (
-                            <td key={dIdx} className="p-1 border-r border-slate-200 last:border-r-0 space-y-1 w-[14.285%]">
+                            <td key={dIdx} className="p-1 border-r border-slate-200 last:border-r-0 space-y-1 w-[14.285%] max-w-[14.285%] overflow-hidden">
                               {dayShifts.length === 0 ? (
                                 <div className="text-xs text-slate-300 italic py-2.5 text-center font-bold">—</div>
                               ) : (
@@ -462,16 +466,20 @@ export default function PrintSheetView({
                                   return (
                                     <div
                                       key={s.id}
-                                      className={`py-0.5 px-1.5 rounded border text-[11px] flex items-center justify-between font-bold leading-tight ${
+                                      className={`py-0.5 px-1.5 rounded border text-[11px] font-bold leading-tight min-w-0 overflow-hidden ${
                                         isNight
                                           ? 'bg-slate-50 border-slate-300 text-slate-900'
                                           : 'bg-emerald-50/70 border-emerald-300 text-slate-900'
                                       }`}
                                     >
-                                      <span className="text-[10.5px] font-black text-slate-900 shrink-0 mr-1">{worker?.name || 'Radnik'}</span>
-                                      <span className="font-mono text-[9.5px] font-bold text-slate-700 whitespace-nowrap ml-auto">
-                                        {formatTime(s.start)} - {formatTime(s.end)}
-                                      </span>
+                                      <div className="flex flex-wrap items-center justify-between gap-x-1 gap-y-0.5 min-w-0">
+                                        <span className="text-[10.5px] font-black text-slate-900 truncate max-w-full">
+                                          {worker?.name || 'Radnik'}
+                                        </span>
+                                        <span className="font-mono text-[9px] sm:text-[9.5px] font-bold text-slate-700 whitespace-nowrap ml-auto">
+                                          {formatTime(s.start)} - {formatTime(s.end)}
+                                        </span>
+                                      </div>
                                     </div>
                                   );
                                 })
@@ -520,16 +528,16 @@ export default function PrintSheetView({
                             .sort((a, b) => a.start - b.start);
 
                           return (
-                            <td key={dIdx} className="p-1 border-r border-slate-200 last:border-r-0 align-top space-y-1">
+                            <td key={dIdx} className="p-1 border-r border-slate-200 last:border-r-0 align-top space-y-1 overflow-hidden">
                               {cellShifts.map(s => {
                                 const w = workers.find(wk => wk.id === s.workerId);
                                 return (
                                   <div
                                     key={s.id}
-                                    className="p-1 rounded border border-slate-300 bg-white shadow-none flex flex-col"
+                                    className="p-1 rounded border border-slate-300 bg-white shadow-none flex flex-col min-w-0 overflow-hidden"
                                   >
-                                    <span className="font-extrabold text-[11px] text-slate-900">{w?.name}</span>
-                                    <span className="font-mono text-[9.5px] font-bold text-slate-600">
+                                    <span className="font-extrabold text-[11px] text-slate-900 truncate">{w?.name}</span>
+                                    <span className="font-mono text-[9px] sm:text-[9.5px] font-bold text-slate-600 whitespace-nowrap">
                                       {formatTime(s.start)}-{formatTime(s.end)}
                                     </span>
                                   </div>
@@ -551,7 +559,7 @@ export default function PrintSheetView({
                 <div className="bg-slate-100 border-b border-slate-300 text-slate-900 px-4 py-1.5 font-black text-xs uppercase tracking-wider flex justify-between">
                   <span>Slobodni Dani i Bolovanja po Danima</span>
                 </div>
-                <table className="w-full border-collapse text-left print-table table-fixed">
+                <table className="w-full border-collapse text-left print-table print-table-7col table-fixed">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-300 text-xs font-black text-slate-800 uppercase">
                       {DAYS.map(d => (
@@ -574,7 +582,7 @@ export default function PrintSheetView({
                         });
 
                         return (
-                          <td key={dIdx} className="p-2.5 border-r-2 border-slate-300 last:border-r-0 text-xs space-y-1.5 font-bold">
+                          <td key={dIdx} className="p-2.5 border-r-2 border-slate-300 last:border-r-0 text-xs space-y-1.5 font-bold w-[14.285%] max-w-[14.285%] overflow-hidden">
                             {sick.map(n => (
                               <div key={n} className="px-2 py-1 rounded bg-rose-100 border border-rose-500 text-rose-950 font-black">
                                 🏥 BOL: {n}
