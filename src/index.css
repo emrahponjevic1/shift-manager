@@ -1,0 +1,419 @@
+@import "tailwindcss";
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090d16;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Light Mode Overrides for Screen only (Will NOT leak into print) */
+@media screen {
+  /* 1. Global Page Background & Base Text */
+  html.light,
+  html.light body,
+  html.light #root {
+    background-color: #f8fafc !important;
+    color: #0f172a !important;
+  }
+
+  html.light .bg-\[\#090d16\],
+  html.light .bg-\[\#0c1220\] {
+    background-color: #f8fafc !important;
+  }
+
+  /* 2. Primary Cards & Panels */
+  html.light .bg-slate-900,
+  html.light .bg-slate-900\/95,
+  html.light .bg-slate-900\/90,
+  html.light .bg-slate-900\/80,
+  html.light .bg-slate-900\/70,
+  html.light .bg-slate-900\/50,
+  html.light .bg-slate-900\/40,
+  html.light .bg-slate-900\/20 {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+  }
+
+  /* 3. Secondary Surfaces, Inputs & Canvas */
+  html.light .bg-slate-950,
+  html.light .bg-slate-950\/95,
+  html.light .bg-slate-950\/90,
+  html.light .bg-slate-950\/80,
+  html.light .bg-slate-950\/70,
+  html.light .bg-slate-950\/60,
+  html.light .bg-slate-950\/50,
+  html.light .bg-slate-950\/40,
+  html.light .bg-slate-950\/30,
+  html.light .bg-slate-950\/20,
+  html.light .bg-slate-950\/10 {
+    background-color: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  /* 4. Chips, Inactive Buttons & Secondary Badges */
+  html.light .bg-slate-850,
+  html.light .bg-slate-800,
+  html.light .bg-slate-800\/90,
+  html.light .bg-slate-800\/80,
+  html.light .bg-slate-800\/70,
+  html.light .bg-slate-800\/60,
+  html.light .bg-slate-800\/50,
+  html.light .bg-slate-800\/40,
+  html.light .bg-slate-800\/30 {
+    background-color: #f1f5f9 !important;
+    color: #1e293b !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  /* 5. Hover states */
+  html.light .hover\:bg-slate-800:hover,
+  html.light .hover\:bg-slate-750:hover,
+  html.light .hover\:bg-slate-700:hover,
+  html.light .hover\:bg-slate-850:hover,
+  html.light .hover\:bg-slate-850\/20:hover,
+  html.light .hover\:bg-slate-850\/40:hover,
+  html.light .hover\:bg-slate-800\/40:hover,
+  html.light .hover\:bg-slate-800\/60:hover {
+    background-color: #e2e8f0 !important;
+  }
+
+  /* 6. Borders and Dividers */
+  html.light .border-slate-800,
+  html.light .border-slate-800\/80,
+  html.light .border-slate-800\/70,
+  html.light .border-slate-800\/60,
+  html.light .border-slate-800\/40,
+  html.light .border-slate-700,
+  html.light .border-slate-900 {
+    border-color: #cbd5e1 !important;
+  }
+
+  html.light .divide-slate-800,
+  html.light .divide-slate-800\/80,
+  html.light .divide-slate-800\/60,
+  html.light .divide-slate-700 {
+    border-color: #e2e8f0 !important;
+  }
+
+  /* 7. High-Contrast Text Rules */
+  html.light .text-white {
+    color: #0f172a !important;
+  }
+  html.light .text-slate-100,
+  html.light .text-slate-200 {
+    color: #0f172a !important;
+  }
+  html.light .text-slate-300 {
+    color: #1e293b !important;
+  }
+  html.light .text-slate-400 {
+    color: #475569 !important;
+  }
+  html.light .text-slate-500 {
+    color: #64748b !important;
+  }
+  html.light .text-slate-600 {
+    color: #94a3b8 !important;
+  }
+
+  /* High contrast colored texts in Light Mode */
+  html.light .text-amber-400,
+  html.light .text-amber-300 {
+    color: #92400e !important;
+  }
+  html.light .text-emerald-400,
+  html.light .text-emerald-300 {
+    color: #065f46 !important;
+  }
+  html.light .text-blue-400,
+  html.light .text-blue-300 {
+    color: #1e40af !important;
+  }
+  html.light .text-rose-400,
+  html.light .text-rose-300,
+  html.light .text-rose-200 {
+    color: #9f1239 !important;
+  }
+  html.light .text-purple-400,
+  html.light .text-purple-300 {
+    color: #581c87 !important;
+  }
+
+  /* 8. Solid Colored Elements Keep Crisp White Text */
+  html.light .bg-blue-600,
+  html.light .bg-blue-500,
+  html.light .bg-emerald-600,
+  html.light .bg-emerald-500,
+  html.light .bg-rose-600,
+  html.light .bg-rose-500,
+  html.light .bg-purple-600,
+  html.light .bg-amber-600,
+  html.light [class*="from-blue-600"],
+  html.light [class*="from-emerald-600"],
+  html.light [class*="from-purple-600"],
+  html.light [class*="from-amber-500"],
+  html.light [class*="from-rose-600"] {
+    color: #ffffff !important;
+  }
+
+  html.light .bg-blue-600 *,
+  html.light .bg-blue-500 *,
+  html.light .bg-emerald-600 *,
+  html.light .bg-emerald-500 *,
+  html.light .bg-rose-600 *,
+  html.light .bg-rose-500 *,
+  html.light .bg-purple-600 *,
+  html.light .bg-amber-600 *,
+  html.light [class*="from-blue-600"] *,
+  html.light [class*="from-emerald-600"] *,
+  html.light [class*="from-purple-600"] *,
+  html.light [class*="from-amber-500"] *,
+  html.light [class*="from-rose-600"] * {
+    color: #ffffff !important;
+  }
+
+  /* 9. Light Mode Badges & Theme Colors */
+  html.light .bg-blue-500\/10,
+  html.light .bg-blue-500\/15,
+  html.light .bg-blue-500\/20,
+  html.light .bg-blue-950,
+  html.light .bg-blue-950\/30,
+  html.light .bg-blue-950\/40,
+  html.light .bg-blue-950\/80 {
+    background-color: #eff6ff !important;
+    color: #1e40af !important;
+    border-color: #bfdbfe !important;
+  }
+
+  html.light .bg-emerald-500\/10,
+  html.light .bg-emerald-500\/15,
+  html.light .bg-emerald-500\/20,
+  html.light .bg-emerald-950,
+  html.light .bg-emerald-950\/80 {
+    background-color: #ecfdf5 !important;
+    color: #065f46 !important;
+    border-color: #a7f3d0 !important;
+  }
+
+  html.light .bg-amber-500\/10,
+  html.light .bg-amber-500\/15,
+  html.light .bg-amber-500\/20,
+  html.light .bg-amber-950 {
+    background-color: #fffbeb !important;
+    color: #92400e !important;
+    border-color: #fde68a !important;
+  }
+
+  html.light .bg-rose-500\/10,
+  html.light .bg-rose-500\/15,
+  html.light .bg-rose-500\/20,
+  html.light .bg-rose-500\/30,
+  html.light .bg-rose-950,
+  html.light .bg-rose-950\/30,
+  html.light .bg-rose-950\/40 {
+    background-color: #fff1f2 !important;
+    color: #9f1239 !important;
+    border-color: #fecdd3 !important;
+  }
+
+  html.light .bg-purple-500\/10,
+  html.light .bg-purple-500\/15,
+  html.light .bg-purple-500\/20,
+  html.light .bg-purple-950 {
+    background-color: #faf5ff !important;
+    color: #581c87 !important;
+    border-color: #e9d5ff !important;
+  }
+
+  /* 10. Header Banner & Location Pastels in Light Mode */
+  html.light [class*="from-slate-850"] {
+    background-image: linear-gradient(to right, #f1f5f9, #ffffff, #f1f5f9) !important;
+    border-color: #e2e8f0 !important;
+  }
+  html.light [class*="from-blue-950"] {
+    background-image: linear-gradient(to right, #eff6ff, #f8fafc) !important;
+    border-color: #bfdbfe !important;
+  }
+  html.light [class*="from-emerald-950"] {
+    background-image: linear-gradient(to right, #ecfdf5, #f8fafc) !important;
+    border-color: #a7f3d0 !important;
+  }
+  html.light [class*="from-purple-950"] {
+    background-image: linear-gradient(to right, #faf5ff, #f8fafc) !important;
+    border-color: #e9d5ff !important;
+  }
+  html.light [class*="from-amber-950"] {
+    background-image: linear-gradient(to right, #fffbeb, #f8fafc) !important;
+    border-color: #fde68a !important;
+  }
+  html.light [class*="from-rose-950"] {
+    background-image: linear-gradient(to right, #fff1f2, #f8fafc) !important;
+    border-color: #fecdd3 !important;
+  }
+
+  /* 11. Shift Cards in GridView - Clean White Pills for Time */
+  html.light .bg-black\/60,
+  html.light .bg-black\/40 {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  /* 12. GridView Sticky Column & Tables */
+  html.light table thead tr {
+    background-color: #f1f5f9 !important;
+  }
+  html.light th.sticky,
+  html.light td.sticky {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  /* 13. Timeline Canvas in TimelineView */
+  html.light .timeline-track-area {
+    background-color: #ffffff !important;
+    background-image: repeating-linear-gradient(to right, transparent, transparent calc(100% / 21 - 1px), #e2e8f0 calc(100% / 21 - 1px), #e2e8f0 calc(100% / 21)) !important;
+  }
+
+  /* 14. Form Controls in Light Mode */
+  html.light input,
+  html.light select,
+  html.light textarea {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+  html.light input:focus,
+  html.light select:focus,
+  html.light textarea:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+  }
+
+  /* 15. Scrollbars in Light Mode */
+  html.light ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+  html.light ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+  }
+  html.light ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+}
+
+/* Standard A4 Landscape Print Styles - 100% Pure White, Full Width Matching Header */
+@page {
+  size: A4 landscape;
+  margin: 6mm 8mm 6mm 8mm;
+}
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-sizing: border-box !important;
+  }
+
+  html,
+  html.light,
+  html.dark,
+  body,
+  #root,
+  .h-screen,
+  main,
+  .print-page-wrapper {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    color: #0f172a !important;
+  }
+
+  /* Strictly hide all application navigation, headers, buttons, sidebars and no-print elements */
+  header,
+  nav,
+  aside,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  /* 99% width container centered */
+  .print-container {
+    box-sizing: border-box !important;
+    width: 99% !important;
+    max-width: 99% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background-color: #ffffff !important;
+  }
+
+  /* Table-fixed forces all 7 days to span 100% width of the header without any truncation */
+  .print-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+  }
+
+  .print-table th,
+  .print-table td {
+    width: 14.285% !important;
+    max-width: 14.285% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Fix: Ensure table header cells have unified background and their inner elements are transparent */
+  .print-table thead tr {
+    background-color: #f1f5f9 !important;
+    background: #f1f5f9 !important;
+  }
+
+  .print-table th,
+  .print-table th div {
+    background-color: transparent !important;
+    background: transparent !important;
+  }
+
+  .print-table-section {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    margin-bottom: 3.5mm !important;
+    width: 100% !important;
+  }
+
+  .print-page-break {
+    page-break-before: always !important;
+    break-before: page !important;
+  }
+}
