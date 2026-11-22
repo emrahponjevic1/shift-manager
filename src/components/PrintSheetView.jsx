@@ -1,4 +1,6 @@
 import React, { useState, useRef } from 'react';
+import * as htmlToImage from 'html-to-image';
+import html2canvas from 'html2canvas';
 import { 
   Printer, 
   Share2, 
@@ -11,7 +13,9 @@ import {
   Settings2,
   Calendar,
   MapPin,
-  Clock
+  Clock,
+  Image as ImageIcon,
+  Loader2
 } from 'lucide-react';
 import { 
   DAYS, 
@@ -47,6 +51,19 @@ export default function PrintSheetView({
 
   // Print typography size: 'large' (default for high readability) vs 'compact'
   const [printFontSize, setPrintFontSize] = useState('large');
+  const [isExportingImage, setIsExportingImage] = useState(false);
+
+  // Check if browser supports Web Share API with image files (iOS Safari, Android Chrome, etc.)
+  const canShareFiles = typeof navigator !== 'undefined' && 
+    typeof navigator.canShare === 'function' && 
+    typeof File !== 'undefined' &&
+    (() => {
+      try {
+        return navigator.canShare({ files: [new File([''], 'test.png', { type: 'image/png' })] });
+      } catch (e) {
+        return false;
+      }
+    })();
 
   const toggleSection = (key) => {
     setPrintSections(prev => ({ ...prev, [key]: !prev[key] }));
@@ -66,6 +83,109 @@ export default function PrintSheetView({
   // 1. Direct browser print (A4 landscape)
   const handlePrint = () => {
     window.print();
+  };
+
+  // 2. Export schedule as high-resolution PNG image
+  const handleExportImage = async (shareMode = false) => {
+    if (!printRef.current || isExportingImage) return;
+
+    setIsExportingImage(true);
+    onShowToast('Pripremam sliku visoke rezolucije...');
+
+    try {
+      const node = printRef.current;
+      const targetWidth = Math.max(1050, node.scrollWidth || 1050);
+      const targetHeight = node.scrollHeight || 750;
+
+      let dataUrl = null;
+
+      try {
+        // Primary Engine: html-to-image (Crisp 2x Retina, native SVG foreignObject)
+        dataUrl = await htmlToImage.toPng(node, {
+          quality: 1,
+          pixelRatio: 2,
+          backgroundColor: '#ffffff',
+          cacheBust: true,
+          skipFonts: true, // Prevents CORS canvas taint on Apple Safari / iOS
+          width: targetWidth,
+          height: targetHeight,
+          style: {
+            width: `${targetWidth}px`,
+            minWidth: `${targetWidth}px`,
+            margin: '0',
+            transform: 'none'
+          }
+        });
+      } catch (primaryErr) {
+        console.warn('html-to-image fallback to html2canvas:', primaryErr);
+        // Fallback Engine: html2canvas
+        const canvas = await html2canvas(node, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          scrollX: 0,
+          scrollY: 0,
+          windowWidth: targetWidth
+        });
+        dataUrl = canvas.toDataURL('image/png', 1.0);
+      }
+
+      if (!dataUrl) {
+        throw new Error('Generisanje slike nije uspjelo.');
+      }
+
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const sanitizedTitle = (week?.title || 'Raspored')
+        .replace(/[^a-zA-Z0-9_\u00C0-\u017F-]/g, '_')
+        .replace(/_+/g, '_');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const fileName = `Siftarica_${sanitizedTitle}_${dateStr}.png`;
+
+      // If mobile sharing requested and supported
+      if (shareMode && canShareFiles) {
+        const file = new File([blob], fileName, { type: 'image/png' });
+        await navigator.share({
+          title: `Raspored Smjena — ${week?.title || ''}`,
+          text: `Službeni raspored smjena (${week?.title || ''})`,
+          files: [file]
+        });
+        onShowToast('Slika uspješno podijeljena!');
+      } else {
+        // Direct download via virtual anchor
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = blobUrl;
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+          document.body.removeChild(link);
+          URL.revokeObjectURL(blobUrl);
+        }, 300);
+
+        // Optionally copy image to clipboard on supported desktop browsers
+        if (!shareMode && navigator.clipboard && typeof window.ClipboardItem !== 'undefined') {
+          try {
+            await navigator.clipboard.write([
+              new window.ClipboardItem({ 'image/png': blob })
+            ]);
+            onShowToast('Slika preuzeta i kopirana u međuspremnik!');
+            setIsExportingImage(false);
+            return;
+          } catch (e) {
+            // Clipboard write might be restricted by user permissions
+          }
+        }
+
+        onShowToast('Slika rasporeda (PNG) uspješno preuzeta!');
+      }
+    } catch (err) {
+      console.error('Greška pri izvozu slike:', err);
+      onShowToast('Greška pri kreiranju slike. Pokušajte ponovo.', 'error');
+    } finally {
+      setIsExportingImage(false);
+    }
   };
 
   // 2. Export to CSV / Excel spreadsheet
@@ -181,10 +301,10 @@ export default function PrintSheetView({
           <div>
             <h2 className="text-xl font-black text-white flex items-center gap-2.5">
               <Printer className="w-6 h-6 text-emerald-400" />
-              Opcije Štampanja & PDF Izvoza (A4 Landscape)
+              Opcije Štampanja, PDF & Izvoza u Sliku (PNG)
             </h2>
             <p className="text-xs text-slate-400 mt-1">
-              Odaberite koje tabele želite uključiti u štampanje i prilagodite veličinu fonta
+              Odaberite koje tabele želite uključiti, odštampajte, sačuvajte kao PDF ili preuzmite kao sliku za dijeljenje
             </p>
           </div>
 
@@ -196,6 +316,37 @@ export default function PrintSheetView({
               <Printer className="w-4 h-4" />
               <span>Printaj / Sačuvaj kao PDF</span>
             </button>
+
+            <button
+              onClick={() => handleExportImage(false)}
+              disabled={isExportingImage}
+              className="px-4.5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black flex items-center gap-2 shadow-lg shadow-purple-600/30 transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Preuzmi raspored kao visokokvalitetnu PNG sliku"
+            >
+              {isExportingImage ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-purple-200" />
+                  <span>Kreiram sliku...</span>
+                </>
+              ) : (
+                <>
+                  <ImageIcon className="w-4 h-4 text-purple-200" />
+                  <span>Preuzmi kao Sliku (PNG)</span>
+                </>
+              )}
+            </button>
+
+            {canShareFiles && (
+              <button
+                onClick={() => handleExportImage(true)}
+                disabled={isExportingImage}
+                className="px-4 py-2.5 rounded-xl bg-violet-700 hover:bg-violet-600 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-violet-700/20 transition-all hover:scale-[1.02] disabled:opacity-50"
+                title="Podijeli sliku direktno na WhatsApp, Viber ili spremi u Galeriju"
+              >
+                <Share2 className="w-4 h-4 text-violet-200" />
+                <span>Podijeli Sliku</span>
+              </button>
+            )}
 
             <button
               onClick={handleExportCSV}
